@@ -1,4 +1,4 @@
-package tq
+package taskqueue
 
 // Notification are type for notification channels
 // https://dave.cheney.net/2014/03/25/the-empty-struct

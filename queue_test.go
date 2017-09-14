@@ -1,4 +1,4 @@
-package tq
+package taskqueue
 
 import (
 	"github.com/stretchr/testify/require"
