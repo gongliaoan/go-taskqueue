@@ -9,7 +9,7 @@ import (
 
 func TestNew(t *testing.T) {
 	queue := NewQueue(0, 10, time.Duration(1))
-	defer queue.Delete()
+	defer queue.Close()
 
 	require.NotNil(t, queue)
 	require.False(t, isFull(queue))
@@ -23,7 +23,7 @@ func TestQueue_NewTask(t *testing.T) {
 	)
 
 	queue := NewQueue(0, numberOfTasks, secondsToTimeout)
-	defer queue.Delete()
+	defer queue.Close()
 
 	wg := sync.WaitGroup{}
 	wg.Add(numberOfTasks)
@@ -31,7 +31,7 @@ func TestQueue_NewTask(t *testing.T) {
 	for i := 0; i < numberOfTasks; i++ {
 		go func() {
 			defer wg.Done()
-			err := queue.Append(NewDebugTask())
+			err := queue.Enqueue(NewDebugTask())
 			require.NoError(t, err)
 		}()
 	}

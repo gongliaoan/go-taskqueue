@@ -40,22 +40,22 @@ func NewQueue(id uint64, cap int, timeout time.Duration) *Queue {
 	return queue
 }
 
-// DeleteAsync send notification to queue deleted and returns a read only channel to user receive a Notification when
+// CloseAsync send notification to queue deleted and returns a read only channel to user receive a Notification when
 // deletion be completed
-func (q *Queue) DeleteAsync() <-chan Notification {
+func (q *Queue) CloseAsync() <-chan Notification {
 	fmt.Println("+ > Delete queue:", q.queueID)
 	close(q.messageCh)
 	fmt.Println("+ < Delete queue:", q.queueID)
 	return q.deleteCh
 }
 
-// Delete wait for all tasks be completed, after that, kill the consumer
-func (q *Queue) Delete() {
-	<-q.DeleteAsync()
+// Close wait for all tasks be completed, after that, kill the consumer
+func (q *Queue) Close() {
+	<-q.CloseAsync()
 }
 
-// AppendAsync send a TaskHandler to the queue and return notification channels
-func (q *Queue) AppendAsync(taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, id uint64, err error) {
+// EnqueueAsync send a TaskHandler to the queue and return notification channels
+func (q *Queue) EnqueueAsync(taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, id uint64, err error) {
 
 	if isFull(q) {
 		return nil, nil, 0, ErrTaskQueueFull
@@ -68,15 +68,15 @@ func (q *Queue) AppendAsync(taskHandler TaskHandler) (doneCh, timeoutCh <-chan N
 	return doneCh, timeoutCh, messageID, nil
 }
 
-// Append send a TaskHandler to the queue and wait for the task execution or timeout
-func (q *Queue) Append(taskHandler TaskHandler) (err error) {
+// Enqueue send a TaskHandler to the queue and wait for the task execution or timeout
+func (q *Queue) Enqueue(taskHandler TaskHandler) (err error) {
 
 	var (
 		doneCh, timeoutCh <-chan Notification
 		id                uint64
 	)
 
-	if doneCh, timeoutCh, id, err = q.AppendAsync(taskHandler); err != nil {
+	if doneCh, timeoutCh, id, err = q.EnqueueAsync(taskHandler); err != nil {
 		return err
 	}
 
