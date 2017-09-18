@@ -96,3 +96,44 @@ func TestQueue_NoTimeout(t *testing.T) {
 }
 
 // end NoTimeout
+
+// begin NoSleep
+type testTaskNoSleep struct {
+	successCount int64
+	timeoutCount int64
+}
+
+func (t *testTaskNoSleep) Success(queueID, taskID string) {
+	atomic.AddInt64(&t.successCount, 1)
+}
+
+func (t *testTaskNoSleep) Timeout(queueID, taskID string) {
+	atomic.AddInt64(&t.timeoutCount, 1)
+}
+
+func TestQueue_NoSleep(t *testing.T) {
+
+	numberOfTasks := 10
+
+	queue := New("NoSleep", numberOfTasks, time.Duration(1)*time.Second)
+	defer queue.Close()
+
+	wg := sync.WaitGroup{}
+	wg.Add(int(numberOfTasks))
+
+	task := &testTaskNoSleep{}
+
+	for i := 0; i < numberOfTasks; i++ {
+		go func() {
+			defer wg.Done()
+			err := queue.Enqueue(task)
+			require.NoError(t, err)
+		}()
+	}
+
+	wg.Wait()
+
+	require.Equal(t, int64(numberOfTasks), task.successCount+task.timeoutCount)
+}
+
+// end NoSleep
