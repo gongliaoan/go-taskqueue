@@ -3,6 +3,7 @@ package taskqueue
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -53,3 +54,45 @@ func TestQueue_NewTask(t *testing.T) {
 
 	wg.Wait()
 }
+
+// begin NoTimeout
+type testTaskNoTimeout struct {
+	successCount int64
+	timeoutCount int64
+}
+
+func (t *testTaskNoTimeout) Success(queueID, taskID string) {
+	atomic.AddInt64(&t.successCount, 1)
+}
+
+func (t *testTaskNoTimeout) Timeout(queueID, taskID string) {
+	atomic.AddInt64(&t.timeoutCount, 1)
+}
+
+func TestQueue_NoTimeout(t *testing.T) {
+
+	numberOfTasks := 10
+
+	queue := New("NoTimeout", numberOfTasks, time.Duration(0))
+	defer queue.Close()
+
+	wg := sync.WaitGroup{}
+	wg.Add(int(numberOfTasks))
+
+	task := &testTaskNoTimeout{}
+
+	for i := 0; i < numberOfTasks; i++ {
+		go func() {
+			defer wg.Done()
+			err := queue.Enqueue(task)
+			require.NoError(t, err)
+		}()
+	}
+
+	wg.Wait()
+
+	require.Equal(t, int64(numberOfTasks), task.successCount)
+	require.Equal(t, int64(0), task.timeoutCount)
+}
+
+// end NoTimeout
