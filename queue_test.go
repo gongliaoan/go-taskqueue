@@ -23,7 +23,7 @@ func (t *testTask) Timeout(queueID, taskID string) {
 }
 
 func TestNew(t *testing.T) {
-	queue := NewQueue("test-queue", 10, time.Duration(1))
+	queue := New("test-queue", 10, time.Duration(1))
 	defer queue.Close()
 
 	require.NotNil(t, queue)
@@ -37,7 +37,7 @@ func TestQueue_NewTask(t *testing.T) {
 		secondsToTimeout = time.Duration(5) * time.Second
 	)
 
-	queue := NewQueue("test-queue", numberOfTasks, secondsToTimeout)
+	queue := New("test-queue", numberOfTasks, secondsToTimeout)
 	defer queue.Close()
 
 	wg := sync.WaitGroup{}

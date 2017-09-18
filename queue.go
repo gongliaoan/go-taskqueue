@@ -19,8 +19,8 @@ func isFull(q *Queue) bool {
 	return cap(q.messageCh) == len(q.messageCh)
 }
 
-// NewQueue queue constructor
-func NewQueue(id string, cap int, timeout time.Duration) *Queue {
+// New queue constructor
+func New(id string, cap int, timeout time.Duration) *Queue {
 
 	messageChannel := make(chan *message, cap)
 	deleteChannel := make(chan Notification)
