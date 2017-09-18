@@ -1,7 +1,6 @@
 package taskqueue
 
 import (
-	"fmt"
 	"sync/atomic"
 	"time"
 )
@@ -43,9 +42,7 @@ func New(id string, cap int, timeout time.Duration) *Queue {
 // CloseAsync send notification to queue deleted and returns a read only channel to user receive a Notification when
 // deletion be completed
 func (q *Queue) CloseAsync() <-chan Notification {
-	fmt.Println("+ > Delete queue:", q.queueID)
 	close(q.messageCh)
-	fmt.Println("+ < Delete queue:", q.queueID)
 	return q.deleteCh
 }
 
@@ -79,10 +76,8 @@ func (q *Queue) Enqueue(taskHandler TaskHandler) (err error) {
 
 	select {
 	case <-doneCh:
-		fmt.Println("+ received done event")
 		return nil
 	case <-timeoutCh:
-		fmt.Println("+ reveived timeout event")
 		return nil
 	}
 }
