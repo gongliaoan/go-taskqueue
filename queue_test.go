@@ -1,12 +1,26 @@
 package taskqueue
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 )
+
+type testTask struct {
+}
+
+func (t *testTask) Success(queueID, taskID string) {
+	fmt.Println("# > running task:", taskID, "from queue:", queueID)
+	time.Sleep(time.Duration(2) * time.Second)
+	fmt.Println("# < running task:", taskID, "from queue:", queueID)
+}
+
+func (t *testTask) Timeout(queueID, taskID string) {
+	fmt.Println("# timeout:", taskID, "from queue:", queueID)
+}
 
 func TestNew(t *testing.T) {
 	queue := NewQueue("test-queue", 10, time.Duration(1))
@@ -32,7 +46,7 @@ func TestQueue_NewTask(t *testing.T) {
 	for i := 0; i < numberOfTasks; i++ {
 		go func() {
 			defer wg.Done()
-			err := queue.Enqueue(NewDebugTask())
+			err := queue.Enqueue(&testTask{})
 			require.NoError(t, err)
 		}()
 	}
