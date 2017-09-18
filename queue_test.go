@@ -13,13 +13,13 @@ type testTask struct {
 }
 
 func (t *testTask) Success(queueID, taskID string) {
-	fmt.Println("# > running task:", taskID, "from queue:", queueID)
+	fmt.Println("# > running task:", taskID, "from:", queueID)
 	time.Sleep(time.Duration(2) * time.Second)
-	fmt.Println("# < running task:", taskID, "from queue:", queueID)
+	fmt.Println("# < running task:", taskID, "from:", queueID)
 }
 
 func (t *testTask) Timeout(queueID, taskID string) {
-	fmt.Println("# timeout:", taskID, "from queue:", queueID)
+	fmt.Println("# timeout:", taskID, "from:", queueID)
 }
 
 func TestNew(t *testing.T) {
@@ -37,7 +37,7 @@ func TestQueue_NewTask(t *testing.T) {
 		secondsToTimeout = time.Duration(5) * time.Second
 	)
 
-	queue := New("test-queue", numberOfTasks, secondsToTimeout)
+	queue := New("NewTask", numberOfTasks, secondsToTimeout)
 	defer queue.Close()
 
 	wg := sync.WaitGroup{}
