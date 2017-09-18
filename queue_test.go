@@ -9,7 +9,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	queue := NewQueue(0, 10, time.Duration(1))
+	queue := NewQueue("test-queue", 10, time.Duration(1))
 	defer queue.Close()
 
 	require.NotNil(t, queue)
@@ -23,7 +23,7 @@ func TestQueue_NewTask(t *testing.T) {
 		secondsToTimeout = time.Duration(5) * time.Second
 	)
 
-	queue := NewQueue(0, numberOfTasks, secondsToTimeout)
+	queue := NewQueue("test-queue", numberOfTasks, secondsToTimeout)
 	defer queue.Close()
 
 	wg := sync.WaitGroup{}

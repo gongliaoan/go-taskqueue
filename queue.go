@@ -12,7 +12,7 @@ type Queue struct {
 	deleteCh       <-chan Notification
 	messageTimeout time.Duration
 	messageCounter uint64
-	queueID        uint64
+	queueID        string
 }
 
 func isFull(q *Queue) bool {
@@ -20,7 +20,7 @@ func isFull(q *Queue) bool {
 }
 
 // NewQueue queue constructor
-func NewQueue(id uint64, cap int, timeout time.Duration) *Queue {
+func NewQueue(id string, cap int, timeout time.Duration) *Queue {
 
 	messageChannel := make(chan *message, cap)
 	deleteChannel := make(chan Notification)
