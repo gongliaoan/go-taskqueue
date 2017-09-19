@@ -10,20 +10,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type testTask struct {
+type testDebugTask struct {
 }
 
-func (t *testTask) Success(queueID, taskID string) {
+func (t *testDebugTask) Success(queueID, taskID string) {
 	fmt.Println("# > running task:", taskID, "from:", queueID)
-	time.Sleep(time.Duration(2) * time.Second)
+	time.Sleep(time.Duration(2) * time.Millisecond)
 	fmt.Println("# < running task:", taskID, "from:", queueID)
 }
 
-func (t *testTask) Timeout(queueID, taskID string) {
+func (t *testDebugTask) Timeout(queueID, taskID string) {
 	fmt.Println("# timeout:", taskID, "from:", queueID)
 }
 
-func TestNew(t *testing.T) {
+func Test_QueueNew(t *testing.T) {
 	queue := New("test-queue", 10, time.Duration(1))
 	defer queue.Close()
 
@@ -31,7 +31,7 @@ func TestNew(t *testing.T) {
 	require.False(t, isFull(queue))
 }
 
-func TestQueue_NewTask(t *testing.T) {
+func Test_QueueNewTask(t *testing.T) {
 
 	var (
 		numberOfTasks    = 10
@@ -47,7 +47,7 @@ func TestQueue_NewTask(t *testing.T) {
 	for i := 0; i < numberOfTasks; i++ {
 		go func() {
 			defer wg.Done()
-			err := queue.Enqueue(&testTask{})
+			err := queue.Enqueue(&testDebugTask{})
 			require.NoError(t, err)
 		}()
 	}
@@ -69,7 +69,7 @@ func (t *testTaskNoTimeout) Timeout(queueID, taskID string) {
 	atomic.AddInt64(&t.timeoutCount, 1)
 }
 
-func TestQueue_NoTimeout(t *testing.T) {
+func Test_QueueNoTimeout(t *testing.T) {
 
 	numberOfTasks := 10
 
@@ -111,7 +111,7 @@ func (t *testTaskNoSleep) Timeout(queueID, taskID string) {
 	atomic.AddInt64(&t.timeoutCount, 1)
 }
 
-func TestQueue_NoSleep(t *testing.T) {
+func Test_QueueNoSleep(t *testing.T) {
 
 	numberOfTasks := 10
 
