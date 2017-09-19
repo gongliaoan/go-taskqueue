@@ -35,7 +35,7 @@ func Test_QueueNewTask(t *testing.T) {
 
 	var (
 		numberOfTasks    = 10
-		secondsToTimeout = time.Duration(5) * time.Second
+		secondsToTimeout = time.Duration(5) * time.Millisecond
 	)
 
 	queue := New("NewTask", numberOfTasks, secondsToTimeout)
