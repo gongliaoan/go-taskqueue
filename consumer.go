@@ -1,23 +1,20 @@
 package taskqueue
 
-import "fmt"
+import "strconv"
 
-func consumer(messageCh <-chan *message, deleteCh chan<- Notification, queueID uint64) {
+func consumer(messageCh <-chan *message, deleteCh chan<- Notification, queueID string) {
 
 	for message := range messageCh {
 		select {
 		case <-message.cancelCh:
-			message.taskHandler.Timeout(queueID, message.id)
+			message.taskHandler.Timeout(queueID, strconv.FormatUint(message.id, 10))
 			close(message.timeoutCh)
 
 		default:
-			fmt.Println("- default, queue:", queueID, "message:", message.id)
-			message.taskHandler.Success(queueID, message.id)
+			message.taskHandler.Success(queueID, strconv.FormatUint(message.id, 10))
 			close(message.doneCh)
 		}
-		fmt.Println("- loop, queue:", queueID, "message:", message.id, "len:", len(messageCh))
 	}
 
-	fmt.Println("- Exiting consumer for queue:", queueID)
 	close(deleteCh)
 }

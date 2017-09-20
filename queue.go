@@ -1,7 +1,6 @@
 package taskqueue
 
 import (
-	"fmt"
 	"sync/atomic"
 	"time"
 )
@@ -12,15 +11,15 @@ type Queue struct {
 	deleteCh       <-chan Notification
 	messageTimeout time.Duration
 	messageCounter uint64
-	queueID        uint64
+	queueID        string
 }
 
 func isFull(q *Queue) bool {
 	return cap(q.messageCh) == len(q.messageCh)
 }
 
-// NewQueue queue constructor
-func NewQueue(id uint64, cap int, timeout time.Duration) *Queue {
+// New queue constructor
+func New(id string, cap int, timeout time.Duration) *Queue {
 
 	messageChannel := make(chan *message, cap)
 	deleteChannel := make(chan Notification)
@@ -43,9 +42,7 @@ func NewQueue(id uint64, cap int, timeout time.Duration) *Queue {
 // CloseAsync send notification to queue deleted and returns a read only channel to user receive a Notification when
 // deletion be completed
 func (q *Queue) CloseAsync() <-chan Notification {
-	fmt.Println("+ > Delete queue:", q.queueID)
 	close(q.messageCh)
-	fmt.Println("+ < Delete queue:", q.queueID)
 	return q.deleteCh
 }
 
@@ -55,37 +52,32 @@ func (q *Queue) Close() {
 }
 
 // EnqueueAsync send a TaskHandler to the queue and return notification channels
-func (q *Queue) EnqueueAsync(taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, id uint64, err error) {
+func (q *Queue) EnqueueAsync(taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, err error) {
 
 	if isFull(q) {
-		return nil, nil, 0, ErrTaskQueueFull
+		return nil, nil, ErrTaskQueueFull
 	}
 
 	messageID := atomic.AddUint64(&q.messageCounter, 1)
 	doneCh, timeoutCh, message := newMessage(messageID, q.messageTimeout, taskHandler)
 	q.messageCh <- message
 
-	return doneCh, timeoutCh, messageID, nil
+	return doneCh, timeoutCh, nil
 }
 
 // Enqueue send a TaskHandler to the queue and wait for the task execution or timeout
 func (q *Queue) Enqueue(taskHandler TaskHandler) (err error) {
 
-	var (
-		doneCh, timeoutCh <-chan Notification
-		id                uint64
-	)
+	var doneCh, timeoutCh <-chan Notification
 
-	if doneCh, timeoutCh, id, err = q.EnqueueAsync(taskHandler); err != nil {
+	if doneCh, timeoutCh, err = q.EnqueueAsync(taskHandler); err != nil {
 		return err
 	}
 
 	select {
 	case <-doneCh:
-		fmt.Println("+ received done event:", id)
 		return nil
 	case <-timeoutCh:
-		fmt.Println("+ reveived timeout event:", id)
 		return nil
 	}
 }
