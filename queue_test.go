@@ -28,7 +28,6 @@ func Test_QueueNew(t *testing.T) {
 	defer queue.Close()
 
 	require.NotNil(t, queue)
-	require.False(t, isFull(queue))
 }
 
 func Test_QueueNewTask(t *testing.T) {

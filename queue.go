@@ -14,10 +14,6 @@ type Queue struct {
 	queueID        string
 }
 
-func isFull(q *Queue) bool {
-	return cap(q.messageCh) == len(q.messageCh)
-}
-
 // New queue constructor
 func New(id string, cap int, timeout time.Duration) *Queue {
 
@@ -54,15 +50,15 @@ func (q *Queue) Close() {
 // EnqueueAsync send a TaskHandler to the queue and return notification channels
 func (q *Queue) EnqueueAsync(taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, err error) {
 
-	if isFull(q) {
-		return nil, nil, ErrTaskQueueFull
-	}
-
 	messageID := atomic.AddUint64(&q.messageCounter, 1)
 	doneCh, timeoutCh, message := newMessage(messageID, q.messageTimeout, taskHandler)
-	q.messageCh <- message
 
-	return doneCh, timeoutCh, nil
+	select {
+	case q.messageCh <- message:
+		return doneCh, timeoutCh, nil
+	default:
+		return nil, nil, ErrTaskQueueFull
+	}
 }
 
 // Enqueue send a TaskHandler to the queue and wait for the task execution or timeout
