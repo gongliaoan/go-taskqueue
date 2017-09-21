@@ -90,7 +90,7 @@ func Test_messageWithTimeout(t *testing.T) {
 	}
 	require.False(t, cancel)
 
-	time.Sleep(time.Duration(11) * time.Millisecond)
+	time.Sleep(time.Duration(20) * time.Millisecond)
 	select {
 	case <-msg.cancelCh:
 		cancel = true
