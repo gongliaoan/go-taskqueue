@@ -233,3 +233,44 @@ func Test_QueueFullSync(t *testing.T) {
 }
 
 // end FullQueue
+
+func Test_QueueTimeout(t *testing.T) {
+
+	queue := New("FullQueueSync", 1, time.Duration(0))
+	defer queue.Close()
+
+	var err [3]error
+	var task [3]*testFullQueue
+	var doneCh, timeoutCh [2]<-chan Notification
+
+	for i := 0; i < 3; i++ {
+		task[i] = &testFullQueue{
+			wait:   make(chan Notification),
+			notify: make(chan Notification),
+		}
+	}
+
+	doneCh[0], timeoutCh[0], err[0] = queue.EnqueueAsync(task[0])
+	<-task[0].notify
+	doneCh[1], timeoutCh[0], err[1] = queue.EnqueueAsync(task[1])
+	err[2] = queue.Enqueue(task[2])
+
+	require.NoError(t, err[0])
+	require.NoError(t, err[1])
+	require.Error(t, err[2])
+
+	close(task[0].wait)
+	<-task[1].notify
+	close(task[1].wait)
+
+	for i := 0; i < 2; i++ {
+		var success bool
+		select {
+		case <-doneCh[i]:
+			success = true
+		case <-timeoutCh[i]:
+			success = false
+		}
+		require.True(t, success)
+	}
+}

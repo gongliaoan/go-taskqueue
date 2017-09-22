@@ -30,7 +30,7 @@ func Test_ConsumerSendMessage(t *testing.T) {
 	messageChannel <- msg
 	close(messageChannel)
 
-	lockDelete := make(chan struct{})
+	lockDelete := make(chan Notification)
 	go func() {
 		<-deleteChannel
 		deleted = true
@@ -85,7 +85,7 @@ func Test_ConsumerSendTask(t *testing.T) {
 
 	close(messageChannel)
 
-	lockDelete := make(chan struct{})
+	lockDelete := make(chan Notification)
 	go func() {
 		<-deleteChannel
 		deleted = true

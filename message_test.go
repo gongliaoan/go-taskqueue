@@ -21,7 +21,7 @@ func Test_messageNoTimeout(t *testing.T) {
 	require.Nil(t, msg.timer)
 
 	done := false
-	lockDone := make(chan struct{})
+	lockDone := make(chan Notification)
 	go func() {
 		<-doneOutCh
 		done = true
@@ -32,7 +32,7 @@ func Test_messageNoTimeout(t *testing.T) {
 	require.True(t, done)
 
 	timeout := false
-	lockTimeout := make(chan struct{})
+	lockTimeout := make(chan Notification)
 	go func() {
 		<-timeOutCh
 		timeout = true
@@ -61,7 +61,7 @@ func Test_messageWithTimeout(t *testing.T) {
 	require.NotNil(t, msg.timer)
 
 	done := false
-	lockDone := make(chan struct{})
+	lockDone := make(chan Notification)
 	go func() {
 		<-doneOutCh
 		done = true
@@ -72,7 +72,7 @@ func Test_messageWithTimeout(t *testing.T) {
 	require.True(t, done)
 
 	timeout := false
-	lockTimeout := make(chan struct{})
+	lockTimeout := make(chan Notification)
 	go func() {
 		<-timeOutCh
 		timeout = true
