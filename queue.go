@@ -20,19 +20,15 @@ func New(id string, cap int, timeout time.Duration) *Queue {
 	messageChannel := make(chan *message, cap)
 	deleteChannel := make(chan Notification)
 
-	queue := func(messageCh chan<- *message, deleteCh <-chan Notification) *Queue {
-		return &Queue{
-			messageCh:      messageCh,
-			deleteCh:       deleteCh,
-			messageTimeout: timeout,
-			messageCounter: 0,
-			queueID:        id,
-		}
-	}(messageChannel, deleteChannel)
-
 	go consumer(messageChannel, deleteChannel, id)
 
-	return queue
+	return &Queue{
+		messageCh:      messageChannel,
+		deleteCh:       deleteChannel,
+		messageTimeout: timeout,
+		messageCounter: 0,
+		queueID:        id,
+	}
 }
 
 // CloseAsync send notification to queue deleted and returns a read only channel to user receive a Notification when

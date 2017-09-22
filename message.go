@@ -17,16 +17,14 @@ func newMessage(id uint64, timeout time.Duration, taskHandler TaskHandler) (done
 	doneChannel := make(chan Notification)
 	timeoutChannel := make(chan Notification)
 
-	msg = func(cancelCh <-chan Notification, doneCh, timeoutCh chan<- Notification) *message {
-		return &message{
-			cancelCh:    cancelCh,
-			doneCh:      doneCh,
-			timeoutCh:   timeoutCh,
-			taskHandler: taskHandler,
-			id:          id,
-			timer:       nil,
-		}
-	}(cancelChannel, doneChannel, timeoutChannel)
+	msg = &message{
+		cancelCh:    cancelChannel,
+		doneCh:      doneChannel,
+		timeoutCh:   timeoutChannel,
+		taskHandler: taskHandler,
+		id:          id,
+		timer:       nil,
+	}
 
 	// not enable timer if timeout is equal to 0
 	if timeout == time.Duration(0) {
