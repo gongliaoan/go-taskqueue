@@ -1,7 +1,6 @@
 package taskqueue
 
 import (
-	"sync/atomic"
 	"time"
 )
 
@@ -10,7 +9,6 @@ type Queue struct {
 	messageCh      chan<- *message
 	deleteCh       <-chan Notification
 	messageTimeout time.Duration
-	messageCounter uint64
 	queueID        string
 }
 
@@ -26,7 +24,6 @@ func New(id string, cap int, timeout time.Duration) *Queue {
 		messageCh:      messageChannel,
 		deleteCh:       deleteChannel,
 		messageTimeout: timeout,
-		messageCounter: 0,
 		queueID:        id,
 	}
 }
@@ -46,8 +43,7 @@ func (q *Queue) Close() {
 // EnqueueAsync send a TaskHandler to the queue and return notification channels
 func (q *Queue) EnqueueAsync(taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, err error) {
 
-	messageID := atomic.AddUint64(&q.messageCounter, 1)
-	doneCh, timeoutCh, message := newMessage(messageID, q.messageTimeout, taskHandler)
+	doneCh, timeoutCh, message := newMessage(q.messageTimeout, taskHandler)
 
 	select {
 	case q.messageCh <- message:

@@ -6,12 +6,11 @@ type message struct {
 	doneCh, timeoutCh chan<- Notification // output channel
 	cancelCh          <-chan Notification // input channel
 
-	id          uint64
 	timer       *time.Timer
 	taskHandler TaskHandler
 }
 
-func newMessage(id uint64, timeout time.Duration, taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, msg *message) {
+func newMessage(timeout time.Duration, taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, msg *message) {
 
 	cancelChannel := make(chan Notification)
 	doneChannel := make(chan Notification)
@@ -22,7 +21,6 @@ func newMessage(id uint64, timeout time.Duration, taskHandler TaskHandler) (done
 		doneCh:      doneChannel,
 		timeoutCh:   timeoutChannel,
 		taskHandler: taskHandler,
-		id:          id,
 		timer:       nil,
 	}
 

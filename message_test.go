@@ -14,10 +14,8 @@ func (t *taskTestMessage) Timeout(queueID, taskID string) {}
 
 func Test_messageNoTimeout(t *testing.T) {
 
-	messageID := uint64(1)
-	doneOutCh, timeOutCh, msg := newMessage(messageID, time.Duration(0), &taskTestMessage{})
+	doneOutCh, timeOutCh, msg := newMessage(time.Duration(0), &taskTestMessage{})
 	require.NotNil(t, msg)
-	require.Equal(t, msg.id, messageID)
 	require.Nil(t, msg.timer)
 
 	done := false
@@ -54,10 +52,8 @@ func Test_messageNoTimeout(t *testing.T) {
 
 func Test_messageWithTimeout(t *testing.T) {
 
-	messageID := uint64(1)
-	doneOutCh, timeOutCh, msg := newMessage(messageID, time.Duration(10)*time.Millisecond, &taskTestMessage{})
+	doneOutCh, timeOutCh, msg := newMessage(time.Duration(10)*time.Millisecond, &taskTestMessage{})
 	require.NotNil(t, msg)
-	require.Equal(t, msg.id, messageID)
 	require.NotNil(t, msg.timer)
 
 	done := false

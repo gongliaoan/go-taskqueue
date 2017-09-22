@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"strconv"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,11 +20,10 @@ func Test_ConsumerSendMessage(t *testing.T) {
 	deleted := false
 
 	queueID := "consumer"
-	messageID := uint64(0)
 
 	go consumer(messageChannel, deleteChannel, queueID)
 
-	_, _, msg := newMessage(messageID, time.Duration(0), &taskTestConsumerSendMessage{})
+	_, _, msg := newMessage(time.Duration(0), &taskTestConsumerSendMessage{})
 	messageChannel <- msg
 	close(messageChannel)
 
@@ -45,16 +42,12 @@ func Test_ConsumerSendMessage(t *testing.T) {
 
 // begin SendTask
 type taskTestConsumerSendTask struct {
-	queueID   string
-	messageID uint64
-	t         *testing.T
+	queueID string
+	t       *testing.T
 }
 
 func (task *taskTestConsumerSendTask) Success(queueID, taskID string) {
 
-	messageID, err := strconv.ParseUint(taskID, 10, 64)
-	require.NoError(task.t, err)
-	require.Equal(task.t, task.messageID, messageID)
 	require.Equal(task.t, task.queueID, queueID)
 
 }
@@ -69,13 +62,12 @@ func Test_ConsumerSendTask(t *testing.T) {
 	deleted := false
 
 	task := &taskTestConsumerSendTask{
-		queueID:   "consumer",
-		messageID: 0,
+		queueID: "consumer",
 	}
 
 	go consumer(messageChannel, deleteChannel, task.queueID)
 
-	doneOutCh, timeoutOutCh, msg := newMessage(task.messageID, time.Duration(0), task)
+	doneOutCh, timeoutOutCh, msg := newMessage(time.Duration(0), task)
 	messageChannel <- msg
 	select {
 	case <-doneOutCh:
