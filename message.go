@@ -10,7 +10,20 @@ type message struct {
 	taskHandler TaskHandler
 }
 
+type timeoutFn func(cancelCh chan<- Notification, timeout time.Duration) *time.Timer
+
+var defaultTimeoutHandleFunc timeoutFn = func(cancelCh chan<- Notification, timeout time.Duration) *time.Timer {
+	return time.AfterFunc(timeout, func() {
+		close(cancelCh)
+	})
+}
+
 func newMessage(timeout time.Duration, taskHandler TaskHandler) (doneCh, timeoutCh <-chan Notification, msg *message) {
+
+	return newMessageWithTimeoutHandleFunc(timeout, taskHandler, defaultTimeoutHandleFunc)
+}
+
+func newMessageWithTimeoutHandleFunc(timeout time.Duration, taskHandler TaskHandler, timeoutHandleFunc timeoutFn) (doneCh, timeoutCh <-chan Notification, msg *message) {
 
 	cancelChannel := make(chan Notification)
 	doneChannel := make(chan Notification)
@@ -30,11 +43,7 @@ func newMessage(timeout time.Duration, taskHandler TaskHandler) (doneCh, timeout
 	}
 
 	// enable timer if timeout is greater than 0
-	msg.timer = func(cancelCh chan<- Notification, timeout time.Duration) *time.Timer {
-		return time.AfterFunc(timeout, func() {
-			close(cancelCh)
-		})
-	}(cancelChannel, timeout)
+	msg.timer = timeoutHandleFunc(cancelChannel, timeout)
 
 	return doneChannel, timeoutChannel, msg
 }
