@@ -5,4 +5,4 @@
 [![Codecov](https://codecov.io/gh/drrzmr/taskqueue-go/branch/master/graph/badge.svg)](https://codecov.io/gh/drrzmr/taskqueue-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/drrzmr/taskqueue-go)](https://goreportcard.com/report/github.com/drrzmr/taskqueue-go)
 [![GoDoc](https://godoc.org/github.com/drrzmr/taskqueue-go?status.png)](https://godoc.org/github.com/drrzmr/taskqueue-go)
-[![License](https://img.shields.io/github/license/drrzmr/taskqueue-go.svg)]()
+[![License](https://img.shields.io/github/license/drrzmr/taskqueue-go.svg)](https://github.com/drrzmr/taskqueue-go/blob/master/LICENSE)
